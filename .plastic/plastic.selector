@@ -1,0 +1,4 @@
+repository "RogueLike2D_Unity6@EduGamesCo@cloud"
+  path "/"
+    br "/main"
+    co "/main"

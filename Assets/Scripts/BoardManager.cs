@@ -4,23 +4,25 @@ using UnityEngine.Tilemaps;
 public class BoardManager : MonoBehaviour {
     public class CellData { public bool IsPassable; }
 
+    [SerializeField] private Tilemap m_tilemap;
+    [SerializeField] private Grid m_Grid;
+
+    [SerializeField] private PlayerController m_PlayerController;
+
+    [SerializeField] private Tile[] groundTiles;
+    [SerializeField] private Tile[] blockingTiles;
+
     [SerializeField] private int width;
     [SerializeField] private int height;
-    [SerializeField] private Tilemap m_tilemap;
-    [SerializeField] private Tile[] groundTiles;
-    [SerializeField] private Tile[] wallTiles;
-    [SerializeField] private Grid m_Grid;
-    [SerializeField] private PlayerController m_PlayerController;
-    [SerializeField] private Vector2Int m_PlayerInitialPos;
 
     private CellData[,] m_boardCellsData;
 
-    void Start()
+    public void Init()
     {
         InitializeBoardComponents();
 
-        int wallIndex = Random.Range(0, 2);
-        SetBoardTiles(wallIndex);
+        int blockTileIndex = Random.Range(0, 2);
+        SetBoardTiles(blockTileIndex);
     }
 
     private void InitializeBoardComponents()
@@ -28,7 +30,6 @@ public class BoardManager : MonoBehaviour {
         m_tilemap = GetComponentInChildren<Tilemap>();
         m_Grid = GetComponentInChildren<Grid>();
         m_boardCellsData = new CellData[width, height];
-        m_PlayerInitialPos = new Vector2Int(1, 1);
 
         SetMainCameraInitialPosition();
     }
@@ -54,7 +55,7 @@ public class BoardManager : MonoBehaviour {
                 // Wall tiles when x,y == 0 || -1
                 if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
                 {
-                    tile = wallTiles[wallIndexArg];
+                    tile = blockingTiles[wallIndexArg];
                     m_boardCellsData[x, y].IsPassable = false;
                 }
                 else
@@ -67,16 +68,9 @@ public class BoardManager : MonoBehaviour {
                 m_tilemap.SetTile(new Vector3Int(x, y, 0), tile);
             }
         }
-
-        SpawnPlayer();
     }
 
-    private void SpawnPlayer()
-    {
-        m_PlayerController.SpawnPlayer(this, m_PlayerInitialPos);
-    }
-
-    public Vector3 SetCellIndexToWorldPosition(Vector2Int cellIndex)
+    public Vector3 CellIndexToWorldPosition(Vector2Int cellIndex)
     {
         return m_Grid.GetCellCenterWorld((Vector3Int)cellIndex);
     }
@@ -85,7 +79,7 @@ public class BoardManager : MonoBehaviour {
     {
 
         // Check if cellIndex is out of bounds of the board
-        // using width and height references
+        // using width and height values
         if (IsCellOutOfBounds(cellIndex))
         {
             Debug.LogError("Cell Index out of bounds");
@@ -94,10 +88,10 @@ public class BoardManager : MonoBehaviour {
 
         // Return cell data at x,y index
         return m_boardCellsData[cellIndex.x, cellIndex.y];
-        
+
         bool IsCellOutOfBounds(Vector2Int cellIndex)
         {
-            return 
+            return
             cellIndex.x < 0 ||
             cellIndex.y < 0 ||
             cellIndex.x >= width ||

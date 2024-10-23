@@ -1,9 +1,8 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class BoardManager : MonoBehaviour
-{
-    public class CellData { public bool IsPasable; }
+public class BoardManager : MonoBehaviour {
+    public class CellData { public bool IsPassable; }
 
     [SerializeField] private int width;
     [SerializeField] private int height;
@@ -13,9 +12,9 @@ public class BoardManager : MonoBehaviour
     [SerializeField] private Grid m_Grid;
     [SerializeField] private PlayerController m_PlayerController;
     [SerializeField] private Vector2Int m_PlayerInitialPos;
-    
+
     private CellData[,] m_boardCellsData;
-    
+
     void Start()
     {
         InitializeBoardComponents();
@@ -56,13 +55,13 @@ public class BoardManager : MonoBehaviour
                 if (x == 0 || y == 0 || x == width - 1 || y == height - 1)
                 {
                     tile = wallTiles[wallIndexArg];
-                    m_boardCellsData[x, y].IsPasable = false;
+                    m_boardCellsData[x, y].IsPassable = false;
                 }
                 else
                 // Inner tiles
                 {
                     tile = groundTiles[Random.Range(0, groundTiles.Length)];
-                    m_boardCellsData[x, y].IsPasable = true;
+                    m_boardCellsData[x, y].IsPassable = true;
                 }
 
                 m_tilemap.SetTile(new Vector3Int(x, y, 0), tile);
@@ -82,5 +81,28 @@ public class BoardManager : MonoBehaviour
         return m_Grid.GetCellCenterWorld((Vector3Int)cellIndex);
     }
 
+    public CellData GetCellData(Vector2Int cellIndex)
+    {
+
+        // Check if cellIndex is out of bounds of the board
+        // using width and height references
+        if (IsCellOutOfBounds(cellIndex))
+        {
+            Debug.LogError("Cell Index out of bounds");
+            return null;
+        }
+
+        // Return cell data at x,y index
+        return m_boardCellsData[cellIndex.x, cellIndex.y];
+        
+        bool IsCellOutOfBounds(Vector2Int cellIndex)
+        {
+            return 
+            cellIndex.x < 0 ||
+            cellIndex.y < 0 ||
+            cellIndex.x >= width ||
+            cellIndex.y >= height;
+        }
+    }
 
 }
